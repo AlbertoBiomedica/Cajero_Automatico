@@ -41,154 +41,29 @@ let consulta = document.getElementById("consulta");
 let imgPerfil = document.getElementById("img-perfil");
 // Variable global para almacenar los datos de los usuarios
 const personas = [
-    ['Alberto17', 'Alberto', 'Vázquez Espinoza', '12345', '987456321', '800', "", 'C:\\fakepath\\avatar5.png'],
-    ['Dey18', 'Deysi', 'Vázquez Espinoza', '54321', '123456789', '500', "", ""]
+    {
+        _usuario: "Alberto17",
+        _nombre: "Alberto",
+        _apellido: "Vázquez Espinoza",
+        _password: "12345",
+        _cuentas: "987456321",
+        _saldo: "500",
+        _movimientos: "",
+        _url: "C:\\fakepath\\user1-128x128.jpg"
+    },
+    {
+        _usuario: 'Dey18',
+        _nombre: 'Deysi',
+        _apellido: "Vázquez Espinoza",
+        _password: '54321',
+        _cuentas: '123456789',
+        _saldo: "700",
+        _movimientos: "",
+        _url: "C:\\fakepath\\user1-128x128.jpg"
+    }
 ];
 const persona = new Persona();
 var contador = 0;
-// Eventos de los botones
-btnRegistro.addEventListener("click", (event) => {
-    event.preventDefault();
-    layoutRegistro.style.display = "flex";
-    layoutLogin.style.display = "none";
-});
-btnRegistrar.addEventListener("click", (event) => {
-    event.preventDefault();
-    if (userRegistro.value === "" || nombre.value === "" || apellidoRegistro.value === "" || passwordRegistro.value === "" || cuenta.value === "" || saldo.value === "") {
-        alert("Alguno de los campos estan vacios, complete nuevamente el formulario de manera correcta");
-        layoutRegistro.reset();
-    } else {
-        if (parseInt(saldo.value) >= 10 && parseInt(saldo.value) <= 990) {
-            let personaIngresada = new Persona(userRegistro.value, nombre.value, apellidoRegistro.value, passwordRegistro.value, cuenta.value, saldo.value, "", url.value);
-            personas[contador] = Object.values(personaIngresada);
-            contador++;
-            layoutRegistro.reset();
-            alert("Se ha registrado el usuario con exito");
-        } else {
-            alert(`El saldo ingresado de $ ${saldo.value}, no esta dentro del parametro recuerde lo siguiente: \n Saldo minimo: $10. \n Saldo Maximo: $980.`);
-            layoutRegistro.reset();
-        }
-    }
-});
-btnHome.addEventListener("click", (event) => {
-    event.preventDefault();
-    layoutRegistro.style.display = "none";
-    layoutLogin.style.display = "flex";
-});
-btnIniciar.addEventListener("click", (event) => {
-    event.preventDefault();
-    for (let i = 0; i < personas.length; i++) {
-        if (personas[i].includes(user.value) || personas[i].includes(password.value)) {
-            let datosPersona = [];
-            for (let j = 0; j < 8; j++) {
-                datosPersona[j] = personas[i][j];
-            }
-            if (datosPersona[0] == user.value && datosPersona[3] == password.value) {
-                persona.Usuario = datosPersona[0];
-                persona.Nombre = datosPersona[1];
-                persona.Apellido = datosPersona[2];
-                persona.Password = datosPersona[3];
-                persona.Cuentas = datosPersona[4];
-                persona.Saldo = datosPersona[5];
-                persona.Movimientos = datosPersona[6];
-                persona.Url = datosPersona[7];
-                let saldoTemporal = parseInt(persona.Saldo);
-                layoutContenedorLogin.style.display = "none";
-                layoutPrincipal.style.display = "flex";
-                bienvenida.innerHTML = "Bienvenido" + " " + persona.toString();
-                noCuenta.innerHTML = "No. cuenta: " + " " + persona.Cuentas.toString();
-                saldoCuenta.innerHTML = "Saldo:" + " $" + persona.Saldo;
-                let urlTem = persona.Url.split("\\");
-                imgPerfil.src = `./img/${urlTem[2]} `;
-                console.log(urlTem[2]);
-                // Evento para agregar un deposito
-                btnCantidadAgregada.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    if (cantidad.value === "") {
-                        alert("No se ha ingresado ninguna cantidad. Vuelva a intentarlo");
-                        formAgregar.reset();
-                    } else {
-                        let cantidadAgregada = cantidad.value;
-                        persona.ingresarMonto(cantidadAgregada);
-                        if (persona.Saldo > 990) {
-                            alert(`El monto ingresado de ${cantidadAgregada} hace que su saldo exceda de $980. \n Ingrese un monto menor`);
-                            persona.Saldo = saldoTemporal;
-                            formAgregar.reset();
-                        } else {
-                            saldoTemporal = parseInt(persona.Saldo);
-                            moviento(persona, saldoTemporal, cantidadAgregada, "deposito");
-                        }
-
-                    }
-                });
-                // Evento para retirar dinero
-                btnCantidadRetirada.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    if (cantidadRetiro.value === "") {
-                        alert("No se ha ingresado ninguna cantidad. Vuelva a intentarlo");
-                        formRetiro.reset();
-                    } else {
-                        let cantidadRetirada = cantidadRetiro.value;
-                        persona.retirarMonto(cantidadRetirada);
-                        if (persona.Saldo < 10) {
-                            alert(`El monto retirado de ${cantidadRetirada} hace que su saldo minimo sea menor de $10. \n Ingrese un monto menor`);
-                            persona.Saldo = saldoTemporal;
-                            formRetiro.reset();
-                        } else {
-                            saldoTemporal = parseInt(persona.Saldo);
-                            console.log("Saldo despues de agregar un monto: " + saldoTemporal);
-                            moviento(persona, saldoTemporal, cantidadRetirada, "retiro");
-                        }
-                    }
-                });
-                //Evento para guradar los movimientos
-                consulta.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    if (persona.Movimientos === "") {
-                        return
-                    } else {
-                        persona.Movimientos.forEach((value) => {
-                            contenedorModalConsulta.appendChild(value);
-                        });
-                    }
-                })
-                //Evento para cerrar 
-                btnCierre.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    saldoTemporal = 0;
-                    for (let i = 0; i < personas.length; i++) {
-                        for (let j = 0; j < 1; j++) {
-                            if (personas[i][j] === persona.Usuario) {
-                                personas[i][5] = persona.Saldo;
-                                personas[i][6] = contenedorModalConsulta.querySelectorAll("p");
-                            }
-                        }
-                    }
-                    contenedorModal.querySelectorAll("p").forEach((value) => {
-                        value.remove();
-                    });
-                    contenedorModalRetiro.querySelectorAll("p").forEach((value) => {
-                        value.remove();
-                    });
-                    contenedorModalConsulta.querySelectorAll("p").forEach((value) => {
-                        value.remove();
-                    });
-                    layoutLogin.reset();
-                    layoutContenedorLogin.style.display = "flex";
-                    layoutPrincipal.style.display = "none";
-                });
-            } else {
-                alert("El usuario o la contraseña no son correctas");
-                layoutLogin.reset();
-            }
-            break;
-        }
-    }
-});
 
 let borbujas_ = document.getElementById("burbujas_");
 // Funciones
@@ -226,6 +101,35 @@ function moviento(persona, saldo, cantidad, tipoMovimiento) {
         formRetiro.reset();
     }
 }
+function verificarMovimiento(moviento_, cantidad, saldo) {
+    if (cantidad === "") {
+        alert("No se ha ingresado ninguna cantidad. Vuelva a intentarlo");
+        formAgregar.reset();
+        formRetiro.reset();
+    } else {
+        if (moviento_ === "deposito") {
+            persona.ingresarMonto(cantidad);
+            if (persona.Saldo > 990) {
+                alert(`El monto ingresado de ${cantidad} hace que su saldo exceda de $980. \n Ingrese un monto menor`);
+                persona.Saldo = saldo;
+                formAgregar.reset();
+            } else {
+                saldo = parseFloat(persona.Saldo);
+                moviento(persona, saldo, cantidad, moviento_);
+            }
+        } else if(moviento_ === "retiro") {
+            persona.retirarMonto(cantidad);
+            if (persona.Saldo < 10) {
+                alert(`El monto retirado de ${cantidad} hace que su saldo minimo sea menor de $10. \n Ingrese un monto menor`);
+                persona.Saldo = saldo;
+                formRetiro.reset();
+            } else {
+                saldo = parseInt(persona.Saldo);
+                moviento(persona, saldo, cantidad, moviento_);
+            }
+        }
+    }
+}
 function borbujas() {
     let borbujas = "div ";
     let numBorbujas = borbujas.repeat(10);
@@ -240,4 +144,120 @@ function borbujas() {
 
 window.addEventListener('DOMContentLoaded', () => {
     borbujas();
+    // Eventos de los botones
+    btnRegistro.addEventListener("click", (event) => {
+        event.preventDefault();
+        layoutRegistro.style.display = "flex";
+        layoutLogin.style.display = "none";
+    });
+    btnRegistrar.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (userRegistro.value === "" || nombre.value === "" || apellidoRegistro.value === "" || passwordRegistro.value === "" || cuenta.value === "" || saldo.value === "") {
+            alert("Alguno de los campos estan vacios, complete nuevamente el formulario de manera correcta");
+            layoutRegistro.reset();
+        } else {
+            if (parseInt(saldo.value) >= 10 && parseInt(saldo.value) <= 990) {
+                let personaIngresada = new Persona(userRegistro.value, nombre.value, apellidoRegistro.value, passwordRegistro.value, cuenta.value, saldo.value, "", url.value);
+                personas[contador] = personaIngresada;
+                contador++;
+                layoutRegistro.reset();
+                alert("Se ha registrado el usuario con exito");
+            } else {
+                alert(`El saldo ingresado de $ ${saldo.value}, no esta dentro del parametro recuerde lo siguiente: \n Saldo minimo: $10. \n Saldo Maximo: $980.`);
+                layoutRegistro.reset();
+            }
+        }
+    });
+    btnHome.addEventListener("click", (event) => {
+        event.preventDefault();
+        layoutRegistro.style.display = "none";
+        layoutLogin.style.display = "flex";
+    });
+    btnIniciar.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (!user.value.trim() || !password.value.trim()) {
+            alert("El campo de usuario o contraseña esta vacio. Verifique y vuela a intentar");
+        } else {
+            let usuario = personas.find((userIngresado) => {
+                if (userIngresado._usuario === user.value) {
+                    return userIngresado;
+                }
+            })
+            if (usuario == null) {
+                alert("El usuario ingresado no existe");
+            } else {
+                console.log(usuario);
+                if (usuario._usuario === user.value && usuario._password === password.value) {
+                    persona.Usuario = usuario._usuario;
+                    persona.Nombre = usuario._nombre;
+                    persona.Apellido = usuario._apellido;
+                    persona.Password = usuario._password;
+                    persona.Cuentas = usuario._cuentas;
+                    persona.Saldo = usuario._saldo;
+                    persona.Movimientos = usuario._movimientos;
+                    persona.Url = usuario._url;
+                    let saldoTemporal = parseFloat(persona.Saldo);
+                    layoutContenedorLogin.style.display = "none";
+                    layoutPrincipal.style.display = "flex";
+                    bienvenida.innerHTML = "Bienvenido" + " " + persona.toString();
+                    noCuenta.innerHTML = "No. cuenta: " + " " + persona.Cuentas.toString();
+                    saldoCuenta.innerHTML = "Saldo:" + " $" + persona.Saldo;
+                    let urlTem = persona.Url.split("\\");
+                    imgPerfil.src = `./img/${urlTem[2]} `;
+                    console.log(urlTem[2]);
+                    // Evento para agregar un deposito
+                    btnCantidadAgregada.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        verificarMovimiento("deposito", cantidad.value, saldoTemporal);
+                    });
+                    // Evento para retirar dinero
+                    btnCantidadRetirada.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        verificarMovimiento("retiro", cantidadRetiro.value, saldoTemporal);
+                    });
+                    //Evento para guradar los movimientos
+                    consulta.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        if (persona.Movimientos === "") {
+                            return
+                        } else {
+                            persona.Movimientos.forEach((value) => {
+                                contenedorModalConsulta.appendChild(value);
+                            });
+                        }
+                    })
+                    //Evento para cerrar 
+                    btnCierre.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        saldoTemporal = 0;
+                        for (let i = 0; i < personas.length; i++) {
+                            if (personas[i]._usuario === persona.Usuario) {
+                                personas[i]._saldo = persona.Saldo;
+                                personas[i]._movimientos = contenedorModalConsulta.querySelectorAll("p");
+                            }
+                        }
+                        contenedorModal.querySelectorAll("p").forEach((value) => {
+                            value.remove();
+                        });
+                        contenedorModalRetiro.querySelectorAll("p").forEach((value) => {
+                            value.remove();
+                        });
+                        contenedorModalConsulta.querySelectorAll("p").forEach((value) => {
+                            value.remove();
+                        });
+                        layoutLogin.reset();
+                        layoutContenedorLogin.style.display = "flex";
+                        layoutPrincipal.style.display = "none";
+                    });
+                } else {
+                    alert("El usuario o la contraseña no son correctas");
+                    layoutLogin.reset();
+                }
+            }
+        }
+    });
 })
